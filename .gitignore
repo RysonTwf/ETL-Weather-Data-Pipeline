@@ -1,0 +1,23 @@
+# Airflow runtime
+logs/
+plugins/
+
+# dbt compiled artifacts and credentials
+dbt/target/
+dbt/dbt_packages/
+dbt/profiles.yml
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Claude
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db

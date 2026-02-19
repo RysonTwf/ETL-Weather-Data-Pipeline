@@ -1,0 +1,22 @@
+version: 2
+
+sources:
+  - name: weather
+    database: weather
+    schema: public
+    tables:
+      - name: raw_weather
+        description: "Raw daily weather data ingested from Open-Meteo API"
+        columns:
+          - name: city
+            description: "City name"
+          - name: date
+            description: "Observation date"
+          - name: temperature_max
+            description: "Daily maximum temperature (°C)"
+          - name: temperature_min
+            description: "Daily minimum temperature (°C)"
+          - name: precipitation
+            description: "Total precipitation (mm)"
+          - name: windspeed_max
+            description: "Maximum wind speed (km/h)"

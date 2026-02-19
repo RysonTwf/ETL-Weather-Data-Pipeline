@@ -1,0 +1,12 @@
+weather_pipeline:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: weather_db        # Docker service name (or localhost for local runs)
+      user: admin
+      password: <your_password>
+      port: 5432
+      dbname: weather
+      schema: public
+      threads: 1
