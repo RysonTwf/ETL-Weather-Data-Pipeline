@@ -30,7 +30,7 @@ weather_project/
 │   └── load.py                   # Upsert into PostgreSQL
 ├── dbt/
 │   ├── dbt_project.yml           # dbt project config
-│   ├── profiles.yml              # dbt connection config
+│   ├── profiles.yml.example      # dbt connection template (copy → profiles.yml)
 │   └── models/
 │       ├── sources.yml           # Declares raw_weather as a source
 │       └── daily_summary.sql     # dbt model: aggregates raw_weather
@@ -68,6 +68,18 @@ Open-Meteo API
       ▼
   [quality_check]    Asserts both tables have > 0 rows; fails the DAG if not
 ```
+
+---
+
+## Configuration
+
+`dbt/profiles.yml` is excluded from version control because it contains database credentials. Before running, create it from the template:
+
+```bash
+cp dbt/profiles.yml.example dbt/profiles.yml
+```
+
+Then edit `dbt/profiles.yml` and fill in your actual credentials. The defaults work as-is with the Docker Compose setup.
 
 ---
 

@@ -1,23 +1,46 @@
-# Airflow runtime
+# ── Credentials & secrets ────────────────────────────────────────────────────
+.env
+.env.*
+*.env
+secrets/
+credentials/
+dbt/profiles.yml       # copy from dbt/profiles.yml.example and fill in values
+*.pem
+*.key
+*.crt
+
+# ── Airflow runtime ──────────────────────────────────────────────────────────
 logs/
 plugins/
+airflow.cfg
+airflow.db
+airflow-webserver.pid
+standalone_admin_password.txt
+webserver_config.py
 
-# dbt compiled artifacts and credentials
+# ── dbt compiled artifacts ───────────────────────────────────────────────────
 dbt/target/
 dbt/dbt_packages/
-dbt/profiles.yml
+dbt/.user.yml
 
-# Python
+# ── Docker volumes / local data ──────────────────────────────────────────────
+volumes/
+postgres_data/
+
+# ── Python ───────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *.egg-info/
 .venv/
 venv/
-.env
+.pytest_cache/
+.coverage
+htmlcov/
 
-# Claude
+# ── Editor & OS ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
 .claude/
-
-# OS
 .DS_Store
 Thumbs.db
+*.swp
