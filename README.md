@@ -212,7 +212,3 @@ docker-compose down -v    # stop containers and delete all data
 ```
 
 ---
-
-## Resume Bullet Point
-
-> Built an automated ETL pipeline using Python, dbt, and Apache Airflow to ingest, transform, and load daily weather data into PostgreSQL on a scheduled basis; implemented idempotent upserts to prevent duplicate rows, pytest unit tests to validate transformation logic, and a Plotly Dash dashboard to visualise pipeline outputs across three tabs.
