@@ -10,13 +10,23 @@ sources:
         columns:
           - name: city
             description: "City name"
+            tests:
+              - not_null
           - name: date
             description: "Observation date"
+            tests:
+              - not_null
           - name: temperature_max
             description: "Daily maximum temperature (°C)"
+            tests:
+              - not_null
           - name: temperature_min
             description: "Daily minimum temperature (°C)"
+            tests:
+              - not_null
           - name: precipitation
             description: "Total precipitation (mm)"
           - name: windspeed_max
             description: "Maximum wind speed (km/h)"
+            tests:
+              - not_null

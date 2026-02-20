@@ -7,6 +7,8 @@ Fetches the last 7 days of daily weather data; no API key required.
 
 import logging
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger(__name__)
@@ -15,6 +17,13 @@ API_URL = "https://api.open-meteo.com/v1/forecast"
 CITY = "Singapore"
 LATITUDE = 1.29
 LONGITUDE = 103.85
+
+
+def _build_session() -> requests.Session:
+    session = requests.Session()
+    retry = Retry(total=3, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+    session.mount("https://", HTTPAdapter(max_retries=retry))
+    return session
 
 
 def extract() -> dict:
@@ -33,7 +42,7 @@ def extract() -> dict:
     }
 
     log.info("Fetching weather data for %s (lat=%s, lon=%s)", CITY, LATITUDE, LONGITUDE)
-    response = requests.get(API_URL, params=params, timeout=30)
+    response = _build_session().get(API_URL, params=params, timeout=30)
     response.raise_for_status()
 
     data = response.json()

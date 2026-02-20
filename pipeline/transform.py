@@ -40,8 +40,9 @@ def transform(raw_data: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
         "windspeed_max":   daily["windspeed_10m_max"],
     })
 
-    # Fill any missing values with 0 (precipitation can be null on dry days)
-    raw_df = raw_df.fillna(0)
+    # Only fill precipitation with 0 — null on dry days is expected.
+    # Other columns (temperature, windspeed) should not be silently zeroed.
+    raw_df["precipitation"] = raw_df["precipitation"].fillna(0)
 
     log.info("Transformed %d rows into raw_df", len(raw_df))
 

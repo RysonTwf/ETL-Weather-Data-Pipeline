@@ -18,7 +18,7 @@ DB_CONN = os.environ.get(
 
 
 def get_data():
-    """Return (raw_df, summary_df). Returns empty DataFrames on any error."""
+    """Return (raw_df, summary_df, error). error is None on success."""
     try:
         engine = create_engine(DB_CONN)
         with engine.connect() as conn:
@@ -32,9 +32,9 @@ def get_data():
                 conn,
             )
         engine.dispose()
-        return raw_df, summary_df
-    except Exception:
-        return pd.DataFrame(), pd.DataFrame()
+        return raw_df, summary_df, None
+    except Exception as exc:
+        return pd.DataFrame(), pd.DataFrame(), str(exc)
 
 
 # ---------------------------------------------------------------------------
@@ -272,8 +272,6 @@ def build_tab_summary(summary_df):
 # App layout
 # ---------------------------------------------------------------------------
 
-raw_df, summary_df = get_data()
-
 app = dash.Dash(__name__)
 app.title = "Weather Pipeline Dashboard"
 
@@ -292,9 +290,21 @@ _TAB_SELECTED_STYLE = {
     "fontWeight": "bold",
 }
 
+_BANNER_HIDDEN = {"display": "none"}
+_BANNER_VISIBLE = {
+    "backgroundColor": "#3a0f0f",
+    "color": "#ff9999",
+    "padding": "10px 30px",
+    "borderBottom": "1px solid #aa3333",
+    "fontSize": "13px",
+}
+
 app.layout = html.Div(
     style={"backgroundColor": "#0a1520", "minHeight": "100vh", "fontFamily": "Arial, sans-serif"},
     children=[
+        # Fires immediately on page load, then every 5 minutes
+        dcc.Interval(id="refresh-interval", interval=5 * 60 * 1000, n_intervals=0),
+
         # Header
         html.Div(
             style={
@@ -314,6 +324,9 @@ app.layout = html.Div(
             ],
         ),
 
+        # DB error banner (hidden until a connection failure occurs)
+        html.Div(id="db-error-banner", style=_BANNER_HIDDEN),
+
         # Tabs
         dcc.Tabs(
             id="tabs",
@@ -329,7 +342,7 @@ app.layout = html.Div(
             ],
         ),
 
-        # Tab content panels (pre-rendered, toggled via display)
+        # Data Model panel (static — pipeline diagram never needs refreshing)
         html.Div(
             id="panel-data-model",
             style={"display": "block", "padding": "20px"},
@@ -357,21 +370,23 @@ app.layout = html.Div(
             ],
         ),
 
+        # Raw Weather panel — content populated/refreshed by callback
         html.Div(
             id="panel-raw-weather",
             style={"display": "none", "padding": "20px"},
             children=[
                 html.H2("Raw Weather", style={"color": "#4a9eda"}),
-                build_tab_raw(raw_df),
+                html.Div(id="raw-content"),
             ],
         ),
 
+        # Daily Summary panel — content populated/refreshed by callback
         html.Div(
             id="panel-daily-summary",
             style={"display": "none", "padding": "20px"},
             children=[
                 html.H2("Daily Summary (dbt)", style={"color": "#4a9eda"}),
-                build_tab_summary(summary_df),
+                html.Div(id="summary-content"),
             ],
         ),
     ],
@@ -379,7 +394,7 @@ app.layout = html.Div(
 
 
 # ---------------------------------------------------------------------------
-# Callback — tab switching (toggle display only, no data re-fetch)
+# Callbacks
 # ---------------------------------------------------------------------------
 
 @app.callback(
@@ -397,6 +412,24 @@ def switch_tab(tab):
         show if tab == "raw-weather" else hide,
         show if tab == "daily-summary" else hide,
     )
+
+
+@app.callback(
+    Output("raw-content", "children"),
+    Output("summary-content", "children"),
+    Output("db-error-banner", "children"),
+    Output("db-error-banner", "style"),
+    Input("refresh-interval", "n_intervals"),
+)
+def refresh_data(_n):
+    raw_df, summary_df, error = get_data()
+    if error:
+        banner_text = f"Database unreachable — charts show last loaded data. Error: {error}"
+        banner_style = _BANNER_VISIBLE
+    else:
+        banner_text = ""
+        banner_style = _BANNER_HIDDEN
+    return build_tab_raw(raw_df), build_tab_summary(summary_df), banner_text, banner_style
 
 
 # ---------------------------------------------------------------------------
