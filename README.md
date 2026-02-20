@@ -13,6 +13,7 @@ An automated ETL pipeline that pulls daily weather data from [Open-Meteo](https:
 | Load          | SQLAlchemy + psycopg2       |
 | Database      | PostgreSQL 15               |
 | Orchestrate   | Apache Airflow 2.9          |
+| Dashboard     | Plotly Dash                 |
 | Runtime       | Docker + Docker Compose     |
 | Testing       | pytest                      |
 
@@ -34,6 +35,9 @@ weather_project/
 │   └── models/
 │       ├── sources.yml           # Declares raw_weather as a source
 │       └── daily_summary.sql     # dbt model: aggregates raw_weather
+├── dashboard/
+│   ├── app.py                    # Plotly Dash app (3 tabs)
+│   └── Dockerfile                # python:3.11-slim image
 ├── sql/
 │   └── create_tables.sql         # Schema: raw_weather table
 ├── tests/
@@ -101,6 +105,7 @@ This will:
 - Start `airflow_db` (Airflow metadata database)
 - Run `airflow-init` to migrate the DB and create the admin user
 - Start `airflow-webserver` (port 8080) and `airflow-scheduler`
+- Start the Plotly Dash dashboard (port 8050)
 
 Wait ~60 seconds for all services to be healthy.
 
@@ -118,7 +123,17 @@ Navigate to [http://localhost:8080](http://localhost:8080)
 3. Click **Trigger DAG** to run immediately
 4. Watch all 5 tasks go green: `extract → transform → load_raw → dbt_run → quality_check`
 
-### 4. Verify data in DBeaver
+### 4. Open the Dashboard
+
+Navigate to [http://localhost:8050](http://localhost:8050)
+
+| Tab | Content |
+|-----|---------|
+| **Data Model** | Visual diagram of the full pipeline architecture |
+| **Raw Weather** | Charts and table from the `raw_weather` table |
+| **Daily Summary** | Charts and table from the `daily_summary` dbt model |
+
+### 5. Verify data in DBeaver
 
 Connect DBeaver to:
 - **Host:** `localhost` | **Port:** `5432`
@@ -200,4 +215,4 @@ docker-compose down -v    # stop containers and delete all data
 
 ## Resume Bullet Point
 
-> Built an automated ETL pipeline using Python, dbt, and Apache Airflow to ingest, transform, and load daily weather data into PostgreSQL on a scheduled basis; implemented idempotent upserts to prevent duplicate rows and pytest unit tests to validate transformation logic.
+> Built an automated ETL pipeline using Python, dbt, and Apache Airflow to ingest, transform, and load daily weather data into PostgreSQL on a scheduled basis; implemented idempotent upserts to prevent duplicate rows, pytest unit tests to validate transformation logic, and a Plotly Dash dashboard to visualise pipeline outputs across three tabs.
